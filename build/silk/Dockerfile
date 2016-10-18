@@ -4,6 +4,9 @@ ENV SILK_VERSION 3.13.0
 ENV YAF_VERSION 2.8.4
 ENV P0F_VERSION 3.09b
 
+RUN mkdir /data
+RUN mkdir /config
+
 RUN apt-get update \
     && apt-get -y install make \
     gcc \
@@ -33,9 +36,16 @@ RUN cd /usr/local/src \
     && wget https://tools.netsa.cert.org/releases/silk-$SILK_VERSION.tar.gz \
     && tar zxvf silk-$SILK_VERSION.tar.gz \
     && cd silk* \
-    && ./configure --enable-ipv6 --enable-output-compression=snappy --with-python --sysconfdir=/etc/silk --enable-data-rootdir=/netflow --prefix=/usr \
+    && ./configure --enable-ipv6 --enable-output-compression=snappy --with-python --sysconfdir=/config --enable-data-rootdir=/data --prefix=/usr \
     && make \
-    && make install
+    && make install \
+    && cp site/twoway/silk.conf /config/ \
+    && cp /usr/share/silk/etc/rwflowpack.conf /config/
+
+RUN sed -i 's/^SENSOR_CONFIG=.*/SENSOR_CONFIG=\/config\/sensor.conf/' /config/rwflowpack.conf
+RUN sed -i 's/^SITE_CONFIG=.*/SITE_CONFIG=\/config\/silk.conf/' /config/rwflowpack.conf
+RUN sed -i 's/^CREATE_DIRECTORIES=.*/CREATE_DIRECTORIES=yes/' /config/rwflowpack.conf
+RUN sed -i 's/^ENABLED=.*/ENABLED=yes/' /config/rwflowpack.conf
 
 # Install YAF from Cert
 RUN cd /usr/local/src \
@@ -45,6 +55,15 @@ RUN cd /usr/local/src \
     && ./configure --enable-applabel --enable-mpls --enable-nonip --prefix=/usr \
     && make \
     && make install
+
+RUN ldconfig
+
+COPY ["./service/","/etc/service/"]
+
+VOLUME ["/data","/config"]
+
+# Clean up build directory
+RUN rm -rf /usr/local/src
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

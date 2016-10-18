@@ -12,4 +12,5 @@ fi
 #export ES_SERVER2="${ES_SERVER2:-1.1.1.1}"
 export FLUENTD_SERVER="${FLUENTD_SERVER:-1.1.1.1}"
 export DOCKER_DATA="${DOCKER_DATA:-/opt/docker_data}"
+export DOCKER_CONFIG="${DOCKER_CONFIG:-/opt/docker_config}"
 docker-compose "$@"
