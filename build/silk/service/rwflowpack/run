@@ -1,1 +1,1 @@
-/usr/sbin/rwflowpack
+/usr/sbin/rwflowpack --pack-interfaces --site-config-file /config/silk.conf --sensor-configuration /config/sensor.conf
