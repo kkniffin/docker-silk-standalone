@@ -7,6 +7,7 @@ ENV P0F_VERSION 3.09b
 RUN mkdir /data
 RUN mkdir /config
 RUN mkdir /opt/files
+RUN mkdir /logs
 
 RUN apt-get update \
     && apt-get -y install make \
@@ -69,7 +70,7 @@ RUN ldconfig
 COPY ["./service/","/etc/service/"]
 COPY ["./files/config/*","/opt/files/"]
 
-VOLUME ["/data","/config"]
+VOLUME ["/data","/config","/logs"]
 
 # Clean up build directory
 RUN rm -rf /usr/local/src
